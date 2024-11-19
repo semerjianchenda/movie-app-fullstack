@@ -1,7 +1,35 @@
 body{
-  padding-top:80px;
+  /* padding-top:80px; */
   word-wrap:break-word;
+  background: #f2e2ae;
 }
-img{
+/* index.ejs */
+.jumbotron{
+  background: #f2ce57;
+}
+.logo{
+  height: 250px;
+  width: 300px;
+}
+.logOrSign{
+  color: white;
+}
+/* profile.ejs css*/
+.profile{
   height: 200px;
+  width: 200px;
+  margin-left: 400px;
+}
+h1{
+  color: white;
+}
+h2{
+  color: white;
+}
+#logout{
+  margin-top: 150px;
+  margin-left: 400px;
+}
+li{
+  list-style: none;
 }
