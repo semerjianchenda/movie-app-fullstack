@@ -8,14 +8,14 @@ module.exports = function(app, passport, db) {
     });
 
     // PROFILE SECTION =========================
-    app.get('/profile', isLoggedIn, function(req, res) {
-        db.collection('messages').find().toArray((err, result) => {
-          if (err) return console.log(err)
-          res.render('profile.ejs', {
-            user : req.user,
-            messages: result
-          })
-        })
+    app.get('/profile', isLoggedIn, function (req, res) {
+      db.collection('movies').find().toArray((err, result) => {
+        if (err) return console.error(err);
+        res.render('profile.ejs', {
+          user: req.user,
+          movies: result, // Correctly pass `movies` here
+        });
+      });
     });
 
     // LOGOUT ==============================
@@ -28,35 +28,62 @@ module.exports = function(app, passport, db) {
 
 // message board routes ===============================================================
 
-    app.post('/messages', (req, res) => {
-      db.collection('messages').save({name: req.body.name, msg: req.body.msg, thumbUp: 0, thumbDown:0}, (err, result) => {
-        if (err) return console.log(err)
-        console.log('saved to database')
-        res.redirect('/profile')
-      })
-    })
+//api
+app.get('/search', async (req, res) => {
+  const query = req.query.title;
+  const apiKey = 'be0a9e445bfb15156b0003a0505817ed'; 
+  
+  console.log(`Received search query: ${query}`); 
 
-    app.put('/messages', (req, res) => {
-      db.collection('messages')
-      .findOneAndUpdate({name: req.body.name, msg: req.body.msg}, {
-        $set: {
-          thumbUp:req.body.thumbUp + 1
-        }
-      }, {
-        sort: {_id: -1},
-        upsert: true
-      }, (err, result) => {
-        if (err) return res.send(err)
-        res.send(result)
-      })
-    })
 
-    app.delete('/messages', (req, res) => {
-      db.collection('messages').findOneAndDelete({name: req.body.name, msg: req.body.msg}, (err, result) => {
-        if (err) return res.send(500, err)
-        res.send('Message deleted!')
-      })
-    })
+  if (!query) {
+      return res.status(400).json({ error: 'No query provided' });
+  }
+
+  try {
+      const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      res.json(data.results);
+  } catch (error) {
+      console.error('Error fetching data from API:', error);
+      res.status(500).json({ error: 'Failed to fetch data' });
+  }
+});
+
+
+// Add a movie
+app.post('/movies', (req, res) => {
+  const { movie, rating } = req.body;
+  db.collection('movies').insertOne({ movie: movie, rating: rating }, (err, result) => {
+    if (err) return console.error(err);
+    console.log("Movie added!");
+    res.redirect('/profile');
+  });
+});
+
+// Edit a movie
+app.put('/movies', (req, res) => {
+  const { oldItem, newItem } = req.body;
+  // Update the movie in the database
+  db.collection('movies').updateOne(
+    { movie: oldItem },  // Find the movie by its old name
+    { $set: { movie: newItem } }, // Set the new movie name
+    (err, result) => {
+      if (err) return res.status(500).send('Failed to update movie');
+      res.status(200).send('Movie updated successfully');
+    }
+  );
+});
+
+// Delete a movie
+app.delete('/movies', (req, res) => {
+  const { movie } = req.body;
+  db.collection('movies').findOneAndDelete({ movie: movie }, (err, result) => {
+    if (err) return res.status(500).send(err);
+    console.log("Movie deleted!");
+    res.send("Movie deleted successfully!");
+  });
+});
 
 // =============================================================================
 // AUTHENTICATE (FIRST LOGIN) ==================================================
