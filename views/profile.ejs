@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>21 Savage Fan Site</title>
+    <title>Movie Forum</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <link rel="stylesheet" href="style.css">
@@ -10,57 +10,56 @@
 <div class="container">
 
     <div class="page-header text-center">
-        <h1><span class="fa fa-anchor"></span> Profile Page</h1>
-        <a href="/logout" class="btn btn-default btn-sm">Logout</a>
+      <img src="/img/logotype-movietime.png" alt="logo" class="profile">
+       
+        <a href="/logout" class="btn btn-default btn-sm" id="logout">Logout</a>
     </div>
 
     <div class="row">
-
-        <!-- LOCAL INFORMATION -->
-        <div class="col-sm-6">
-            <div class="well">
-                <h3><span class="fa fa-user"></span> Local</h3>
-
-                <% if (user.local.email) { %>
-                    <p>
-                        <strong>id</strong>: <%= user._id %><br>
-                        <strong>email</strong>: <%= user.local.email %><br>
-                        <strong>password</strong>: <%= user.local.password %>
-                    </p>
-
-                    <a href="/unlink/local" class="btn btn-default">Unlink</a>
-                <% } else { %>
-                    <a href="/connect/local" class="btn btn-default">Connect Local</a>
+      <div class="col-sm-6">
+        <h1>My Movie Lists</h1>
+        <ul class="movies">
+          <% for (var i = 0; i < movies.length; i++) { %>
+            <li class="movieItem">
+              <a href="/movieforum/<%= encodeURIComponent(movies[i].movie) %>">
+                <span class="movie-name"><%= movies[i].movie %></span>
+              </a>
+              <span class="movieRate">
+                <% for (var j = 1; j < Math.floor(movies[i].rating); j++) { %>
+                  <i class="fa fa-star" aria-hidden="true"></i>
                 <% } %>
-
-            </div>
-        </div>
-        <div class="col-sm-6">
-          <h3>Messages</h3>
-          <ul class="messages">
-          <% for(var i=0; i<messages.length; i++) {%>
-            <li class="message">
-              <span><%= messages[i].name %></span>
-              <span><%= messages[i].msg %></span>
-              <span><%= messages[i].thumbUp %></span>
-              <span><i class="fa fa-thumbs-up" aria-hidden="true"></i></span>
-              <span><i class="fa fa-thumbs-down" aria-hidden="true"></i></span>
-              <span><i class="fa fa-trash" aria-hidden="true"></i></span>
+                <i class="fa fa-star" data-movie="<%= movies[i].movie %>" 
+                  data-rating="<%= movies[i].rating %>" aria-hidden="true"></i>
+              </span>
+              <span><i class="fa fa-pencil" data-movie="<%= movies[i].movie %>" 
+                data-rating="<%= movies[i].rating %>" aria-hidden="true"></i></span>
+              <span class="delete">
+                <i class="fa fa-trash-o" data-movie="<%= movies[i].movie %>" 
+                data-rating="<%= movies[i].rating %>" aria-hidden="true"></i>
+              </span>
             </li>
           <% } %>
-          </ul>
+        </ul>
+    
+        <h2>Add a movie </h2>
+        <form action="/movies" method="POST" id="movies">
+          <input type="text" placeholder="movie name" name="movie" required>
+          <input type="text" name="rating" placeholder="Enter a number 1-5">
+          <button type="submit">Add</button>
+        </form>
+    
+        <h2>Search for a Movie</h2>
+        <form id="searchForm">
+          <input type="text" id="movieTitle" placeholder="Enter movie name" required>
+          <button type="submit">Search</button>
+        </form>
+    
+        <div id="movieResults"></div> <!-- Movie results will be displayed here -->
+    
+      </div>
+    </div>
 
-          <h2>Add a message</h2>
-        <% if (user.local.email) { %>
-          <form action="/messages" method="POST">
-            <input type="text" value="<%= user.local.email %>" name="name">
-            <input type="text" placeholder="message" name="msg">
-            <button type="submit">Submit</button>
-          </form>
-        </div>
-        <% } %>
-
-</div>
+  
 
 <script src="main.js"></script>
 
